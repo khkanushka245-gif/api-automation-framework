@@ -95,7 +95,7 @@ public void getUserReturnsExpectedFields() {
 
 ---
 
-## 🎯 Why This Project (for Interviews)
+## 🎯 Highlights
 
 - Proves **API testing depth** across two ecosystems (Python & Java).
 - Demonstrates **data-driven** and **contract validation** techniques.

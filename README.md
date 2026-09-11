@@ -62,8 +62,28 @@ pytest -v
 
 ```bash
 cd java
-mvn clean test
+mvn clean test                     # runs testng.xml
+mvn test -DbaseUri=https://your-api # point at a different target
 ```
+
+**Structure (POM-style for APIs):**
+- `config/EnvConfig` — base URI, auth, and finite timeouts (system-property / env overridable)
+- `config/RestAssuredConfigFactory` — explicit connect + socket timeouts (fail fast, no `Thread.sleep`)
+- `base/BaseApiTest` — `@BeforeSuite` fixture with reusable, immutable request/response specs
+- `services/UserService` — service object (API equivalent of a Page Object); no assertions inside
+- `retry/RetryAnalyzer` + `RetryListener` — retries **only** transient failures (network/timeout/5xx), never assertion failures
+- `api/UsersApiTest` — data-driven (`@DataProvider`), order-independent, contract + field assertions
+- `testng.xml` — suite + retry listener registration
+
+**Anti-flakiness by design:** finite HTTP timeouts, transient-only bounded retry,
+no shared mutable state (safe in any order / parallel), and assertions on the
+contract and stable fields rather than volatile values.
+
+> The canonical green run is CI (`.github/workflows/api-tests.yml`), which runs
+> `mvn -B clean test` on a clean runner. Behind a TLS-intercepting corporate
+> proxy, local runs may fail SSL handshake to public APIs — that is an
+> environment trust issue, not a test defect; run in CI or add your proxy CA to
+> the JVM truststore.
 
 ---
 
